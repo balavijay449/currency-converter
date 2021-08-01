@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Currency converter</title>
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+	<meta charset="utf-8">
+	<meta name="theme-color" content="#4D91E2">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="stylesheet" type="text/css" href="currency.css">
+</head>
+<body>
+	<div class="container d-flex justify-content-center align-items-center">
+		<div class="root">
+			<header class="text-center text-light">Currency converter</header>
+			<div class="d-flex flex-column justify-content-around center">
+				<div class="d-flex justify-content-center">
+					<div class="test">
+						<select class="from">
+							<option value="INR">India(INR)</option>
+						</select>
+						<div class="text-center">
+							<input type="checkbox" id="check" style="position: absolute; display: none;">
+							<label for="check" style="margin: 0;">
+								<span class="btn swap"><img src="swap.png" height="20"></span>
+							</label>
+						</div>
+						<select class="to">
+							<option value="USD">United States of America(USD)</option>
+						</select>
+					</div>
+				</div>
+				<div class="d-flex justify-content-center">
+					<div class="d-flex flex-column justify-content-around align-items-center test">
+						<div class="output_1">0</div>
+						<div class="inp">
+							<input type="number" class="input" placeholder="Enter" />
+						</div>
+						<div class="output_2">0</div>
+						<div class="output">0</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<script type="text/javascript">
+		function currency(){
+
+			//fetch the country names....
+			fetch("https://free.currconv.com/api/v7/countries?apiKey=d1c4a9c5125501fe8360")
+			.then(res => res.json())
+			.then(data => {
+				return data.results;
+			})
+			.then(data => {
+				var country_array = Object.entries(data).sort();
+
+				//store the country names in option.....
+				for (var i = 0; i < country_array.length ; i++) {
+					var country = country_array[i][1].name;
+					var currency = country_array[i][1].currencyId;
+					document.querySelector(".from").innerHTML += "<option value='"+currency+"'>" + country + "(" + currency + ")" + "</option><br>";
+					document.querySelector(".to").innerHTML += "<option value='"+currency+"'>" + country + "(" + currency + ")" + "</option><br>";
+				}
+
+				//fetch currency rates....
+				fetch("https://openexchangerates.org/api/latest.json?app_id=de7aa90efba64b39b0914a720880c0cf")
+				.then(res => res.json())
+				.then(data => {
+					var rates = data.rates;
+					//console.log(rates);
+
+					//swap the select element values....
+					function selectSwap(){
+						var selectBox_1 = document.querySelector(".from");
+						var from_inner = selectBox_1.options[selectBox_1.selectedIndex];
+						var selectBox_2 = document.querySelector(".to");
+						var to_inner = selectBox_2.options[selectBox_2.selectedIndex];
+						var check = document.querySelector("#check").checked;
+						if (check == false) {
+
+							// swaping the selected elements....
+							a = from_inner.text;
+							from_inner.text = to_inner.text;
+							to_inner.text = a;
+
+							c = from_inner.value;
+							from_inner.value = to_inner.value;
+							to_inner.value = c;
+						}
+						else{
+
+							// swaping the selected elements....
+							b = from_inner.text;
+							from_inner.text = to_inner.text;
+							to_inner.text = b;
+
+							c = from_inner.value;
+							from_inner.value = to_inner.value;
+							to_inner.value = c;
+						}
+					}
+					document.querySelector(".swap").addEventListener("click", selectSwap);
+
+					//convert the currency rates....
+					function final(){
+						var input = document.querySelector(".input").value;
+						var from = document.querySelector(".from").value;
+						var	to = document.querySelector(".to").value;
+						var from_amount = (rates[to]/rates[from]);
+						var to_amount = (rates[from]/rates[to]);
+						if (input == '') {
+							document.querySelector(".output").innerHTML = 0 +" "+ from +" = "+ 0 * from_amount +" "+ to;
+						}
+						else{
+							document.querySelector(".output").innerHTML = input +" "+ from +" = "+ (input * from_amount).toFixed(4) +" "+ to;
+						}
+						document.querySelector(".output_1").innerHTML = "1 "+ from +" = "+ from_amount.toFixed(4) +" "+ to;
+						document.querySelector(".output_2").innerHTML = "1 "+ to +" = "+ to_amount.toFixed(4) +" "+ from;		
+					}
+					document.querySelector(".input").addEventListener("input", final);
+					document.querySelector(".from").addEventListener("change", final);
+					document.querySelector(".to").addEventListener("change", final);
+					window.onload = final();
+
+					// swap the currency rates....
+					function swap(){
+						var input = document.querySelector(".input").value;
+						var from = document.querySelector(".from").value;
+						var	to = document.querySelector(".to").value;
+						var from_amount = (rates[to]/rates[from]);
+						var to_amount = (rates[from]/rates[to]);
+							var check = document.querySelector("#check").checked;
+							if (check == false) {
+
+								// swaping the currency....
+								if (input == '') {
+									document.querySelector(".output").innerHTML = 0 +" "+ from +" = "+ 0 * from_amount +" "+ to;
+								}
+								else{
+									document.querySelector(".output").innerHTML = input +" "+ from +" = "+ (input * from_amount).toFixed(4) +" "+ to;
+								}
+								document.querySelector(".output_1").innerHTML = "1 "+ from +" = "+ from_amount.toFixed(4) +" "+ to;
+								document.querySelector(".output_2").innerHTML = "1 "+ to +" = "+ to_amount.toFixed(4) +" "+ from;
+							}
+							else{
+
+								// swaping the currency....
+								if (input == '') {
+									document.querySelector(".output").innerHTML = 0 +" "+ from +" = "+ 0 * from_amount +" "+ to;
+								}
+								else{
+									document.querySelector(".output").innerHTML = input +" "+ from +" = "+ (input * from_amount).toFixed(4) +" "+ to;
+								}
+								document.querySelector(".output_1").innerHTML = "1 "+ from +" = "+ from_amount.toFixed(4) +" "+ to;
+								document.querySelector(".output_2").innerHTML = "1 "+ to +" = "+ to_amount.toFixed(4) +" "+ from;
+							}
+						}
+						document.querySelector(".swap").addEventListener("click", swap);
+				})
+			})
+		}
+		currency();
+
+		// checkbox uncheck when reload....
+		function checked(){
+			document.querySelector("#check").checked = false;
+		}
+		window.onload = checked();
+	</script>
+</body>
+</html>
